@@ -29,7 +29,8 @@ a{
 .title{
 	font-size: 30px;
 	text-align: right;
-	letter-spacing:25px;
+	white-space: nowrap;
+	letter-spacing:10px;
 }
 /*.message{
 	text-align: right;

@@ -5,12 +5,6 @@ grey:#999
 body{
 	color:#000;
 }
-a{
-	color:#555;
-}
-a:hover{
-	color:#000;
-}
 .container{
 	position: relative;
 }

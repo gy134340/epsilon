@@ -1,0 +1,27 @@
+{
+  "name": "shb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gy134340/shepherdboy.git"
+  },
+  "author": "gy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gy134340/shepherdboy/issues"
+  },
+  "homepage": "https://github.com/gy134340/shepherdboy#readme",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-eslint": "^7.1.1",
+    "css-loader": "^0.26.1",
+    "eslint": "^3.13.0",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.14.0"
+  }
+}

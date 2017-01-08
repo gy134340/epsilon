@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>three.js</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="description" content="展示一些样例,写一些书籍,干点啥好呢,gy的网站">
+	<meta name="keywords" content="three.js,demos,canvas,webgl,tricks,前端,guoyang,gy134340,web">
+	<link rel="icon" href="img/icon/favicon.png">
+	<link rel="stylesheet" href="css/reset.css">
+	<style>
+		body{
+			background-color: #000;
+		}
+		.container{
+			width: 100%;
+			height: 100%;	
+		}
+		.wrap_img{
+			position: absolute;
+			left:50%;
+			margin-left: -375px;
+			display: none;
+			top:0;
+			width: auto;
+		}
+		#canvas{
+			position: absolute;
+			top:0px;
+			left:50%;
+			display: none;
+			margin-left: -375px;
+		}
+		#canvas_img{
+			display: block;
+			width: 750px;
+			height: auto;
+			max-width: 100%;
+			margin: 0 auto;
+		}
+		.content{
+			position: absolute;
+			width: 750px;
+			height: 495px;
+			left:50%;
+			top:50%;
+			-webkit-transform:translate(-50%,-50%);
+			transform:translate(-50%,-50%);
+			perspective: 500;
+			background-color: #000;
+		}
+		.atom{
+			position: absolute;
+		} 
+		.control{
+			position: absolute;
+			top:-45px;
+			left:50%;
+			width: 600px;
+			height: 30px;
+			margin-left: -300px;
+			display: -webkit-box;
+			display: box;
+		}
+		.control .sub{
+			-webkit-box-flex:1;
+			box-flex:1;
+			margin:4px;
+			cursor: pointer;
+			/*background-color: #9BA439;*/
+			background-color: #8DA46E;
+			border-radius: 3px;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<canvas id="canvas" width="750" height="495">	
+	</canvas>
+	<div class="wrap_img">
+		<img id="canvas_img" src="img/sunflower.jpg" alt="">
+	</div>
+
+	<!-- draw -->
+	<div class="content">
+		<div class="control">
+			<div class="sub" id="rotatex">rotateX</div>
+			<div class="sub" id="rotatey">rotateY</div>
+			<div class="sub" id="scale">scale</div>
+			<div class="sub" id="translate">translate</div>
+			<div class="sub" id="skew">skew</div>
+		</div>
+	</div>
+	
+</div>
+<script src="js/three.min.js"></script>
+<!-- <script src="js/renderers/Projector.js"></script>
+<script src="js/renderers/CanvasRenderer.js"></script> -->
+<!-- <script src='js/jquery-1.11.1.min.js'></script> -->
+
+<script src='js/Tween.js'></script>
+<script src="js/RequestAnimationFrame.js"></script>
+
+<script type="text/javascript">
+
+	/**
+	 * canavs and img 
+	 * @author  gy
+	 */
+	
+	var ANIMATION;
+	var image,canvas,ctx,imgData;
+	var canvasWidth,canvasHeight;
+
+	var winWidth, windHeight;
+	var content = document.querySelectorAll('.content')[0];
+	
+	function init(){
+		image = document.getElementById("canvas_img");
+
+		canvas = document.getElementById("canvas");
+		ctx = canvas.getContext('2d');
+		ctx.drawImage(image,0,0);
+		canvasWidth = canvas.width;
+		canvasHeight = canvas.height;
+
+		winWidth = window.innerWidth;
+		windHeight = window.innerHeight;
+	}
+
+	function draw(){
+
+		var atomWidth = canvasWidth / 50 ;
+		var atomHeight = canvasHeight / 33;
+
+		for(var i = 0; i < canvasWidth; i+=atomWidth){
+			for(var j = 0; j < canvasHeight; j+= atomHeight){
+
+				var atom = document.createElement('canvas');
+				atom.className = 'atom';
+				atom.width = atomWidth ;
+				atom.height = atomHeight;
+
+				atom.style.left = 0 + 'px';
+				atom.style.top = 0 + 'px';
+				atom.setAttribute('data-left',i);
+				atom.setAttribute('data-top',j);
+
+				// tween
+				var xpoi = i;
+				var ypoi = j;
+
+				var updateCallback = function() {
+					this.domElement.style.left = this.left + 'px';
+					this.domElement.style.top = this.top + 'px';
+					// this.domElement.style.-webkit-transform = 'translate(' + this.left + 'px, ' + this.top + 'px);';
+				};
+
+				// @todo 注意，这里好像要传入dom, 1 hours debug 
+				var coords = { left:canvasWidth*Math.random(),top:canvasHeight*Math.random(),domElement:atom};		
+
+				var tween = new TWEEN.Tween(coords)
+					.to({
+						left: xpoi,
+						top: ypoi
+					},4000)
+					.onUpdate(updateCallback)
+					.easing( TWEEN.Easing.Exponential.InOut );
+					
+				tween.start();
+
+
+				var atomCtx = atom.getContext('2d');
+				var subImageData = ctx.getImageData(i,j,atomWidth,atomHeight);
+
+				// 注意最后两个参数是整张canvas的比例大小,不能写atom的
+				atomCtx.putImageData(subImageData,0,0,0,0,canvasWidth,canvasHeight);
+				content.append(atom);
+				
+			}		
+		}
+	}
+
+	function blend(){
+		init();
+		imgData = ctx.getImageData(0,0,canvasWidth,canvasHeight);			// total img data
+		draw();
+	}
+
+	blend();			// 初始canvas分割成小块
+	
+	
+	function animate(){
+		
+		requestAnimationFrame( animate );
+		TWEEN.update();
+	}
+
+	
+
+	// 移动图片小块
+	// function tweenAtomsPosition(){
+
+	// 	var atoms = document.querySelectorAll('.atom');
+	// 	var len = atoms.length;
+	// 	for( var i = 0;i<len;i++ ){
+	// 		var atom = atoms[i];
+	// 		var xpoi = atom.getAttribute('data-left');
+	// 		var ypoi = atom.getAttribute('data-top');
+	// 		// console.log(xpoi,ypoi);
+
+	// 		var updateCallback = function() {
+	// 			console.log(this.left);
+	// 			this.domElement.style.left = this.left + 'px';
+	// 			// this.domElement.style.transform = 'translate(' + this.left + 'px, ' + this.top + 'px);';
+	// 		};
+	// 		var coords = { left:0,top:0,domElement:atom};	
+
+	// 		var tween = new TWEEN.Tween(coords)
+	// 			.to({
+	// 				left: xpoi,
+	// 				top: ypoi
+	// 			},2000)
+	// 			.onUpdate(updateCallback)
+	// 			.easing( TWEEN.Easing.Exponential.InOut );
+				
+	// 		tween.start();
+	// 	}
+	// }
+
+	// dom加载完开始
+	window.addEventListener('load', function() {
+		animate();			// tween
+
+
+		var rotatex = document.getElementById("rotatex");
+		rotatex.addEventListener('click',function(){
+			
+			var atoms = document.querySelectorAll(".atom");
+			for(var i = 0,len=atoms.length;i<len;i++){
+
+				atoms[i].style.transform = 'rotateX(60deg)';
+			}
+		},false);
+
+		var rotatey = document.getElementById("rotatey");
+		rotatey.addEventListener('click',function(){
+			
+			var atoms = document.querySelectorAll(".atom");
+			for(var i = 0,len=atoms.length;i<len;i++){
+
+				atoms[i].style.transform = 'rotateY(60deg)';
+			}
+		},false);
+
+
+		var scale = document.getElementById("scale");
+		scale.addEventListener('click',function(){
+			
+			var atoms = document.querySelectorAll(".atom");
+			for(var i = 0,len=atoms.length;i<len;i++){
+
+				atoms[i].style.transform = 'scale(0.6,0.6)';
+			}
+		},false);
+		
+		var translate = document.getElementById("translate");
+		translate.addEventListener('click',function(){
+			
+			var atoms = document.querySelectorAll(".atom");
+			for(var i = 0,len=atoms.length;i<len;i++){
+				var x = Math.random() * 10;
+				var y = Math.random() * 10;
+				x = x.toFixed(0) + 'px';
+				y = y.toFixed(0) + 'px';
+				// atoms[i].style.transform = 'translate('+ x.toFixed(0) +'px,'+ y.toFixed(0) +' px)';
+				atoms[i].style.transform = 'translate('+x+','+y+')';
+			}
+		},false);
+
+
+		var skew = document.getElementById("skew");
+		skew.addEventListener('click',function(){
+			
+			var atoms = document.querySelectorAll(".atom");
+			for(var i = 0,len=atoms.length;i<len;i++){
+				// atoms[i].style.transform = 'translate('+ x.toFixed(0) +'px,'+ y.toFixed(0) +' px)';
+				atoms[i].style.transform = 'skewX(45deg)';
+			}
+		},false);
+
+	});
+
+</script>	
+</body>
+</html>

@@ -157,7 +157,7 @@
 					// this.domElement.style.-webkit-transform = 'translate(' + this.left + 'px, ' + this.top + 'px);';
 				};
 
-				// @todo 注意，这里好像要传入dom, 1 hours debug 
+				// @todo 注意，这里要传入dom, 1 hours debug 
 				var coords = { left:canvasWidth*Math.random(),top:canvasHeight*Math.random(),domElement:atom};		
 
 				var tween = new TWEEN.Tween(coords)
@@ -250,7 +250,7 @@
 			var atoms = document.querySelectorAll(".atom");
 			for(var i = 0,len=atoms.length;i<len;i++){
 
-				atoms[i].style.transform = 'rotateY(60deg)';
+				atoms[i].style.transform = 'rotateY(180deg)';
 			}
 		},false);
 

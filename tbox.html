@@ -99,15 +99,14 @@ function init(){
 	stats = new Stats();
 	container.appendChild(stats.dom);
 
-	// drawLine();
 
 	var geometry = new THREE.BoxGeometry(200, 400, 200);
 	var material = new THREE.MeshBasicMaterial({color:0x00ffff, wireframe: true});
 
 	for(var i = 0; i < 300; i++){
-		var randX = Math.random() * 60 + 2;
-		var randY = Math.random() * 60 + 2;
-		var randZ = Math.random() * 60 + 2;
+		var randX = Math.random() * 5 + 50;
+		var randY = Math.random() * 5 + 50;
+		var randZ = Math.random() * 5 + 50;
 		randX = randX.toFixed(0);
 		randY = randY.toFixed(0);
 		randZ = randZ.toFixed(0);
@@ -216,56 +215,9 @@ function showMessage( id){
 	},1000);
 }
 
-// // 画一个网格
-// function drawLine() {
-
-// 	var material = new THREE.LineBasicMaterial({
-// 		color: 0xCCCCCC
-// 	});
-	
-// 	for ( var i = -20; i < 20; i++ ){
-		
-// 		var geometry =  new THREE.Geometry();
-// 		geometry.vertices.push(
-// 			new THREE.Vector3( 50*i, -1000, 0 ),
-// 			new THREE.Vector3( 50*i, 1000, 0 )
-// 		);
-// 		var line = new THREE.Line( geometry, material );
-// 		scene.add( line );
-// 	}
-// 	for ( var j = -20; j < 20; j++ ){
-		
-// 		var geometry =  new THREE.Geometry();
-// 		geometry.vertices.push(
-// 			new THREE.Vector3( -1000, 50*j, 0 ),
-// 			new THREE.Vector3( 1000, 50*j, 0 )
-// 		);
-// 		var line = new THREE.Line( geometry, material );
-// 		scene.add( line );
-// 	}
-	
-// }
-
-
-
 // start here
 init();
 animate();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </script>	
 </body>

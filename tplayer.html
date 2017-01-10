@@ -35,7 +35,7 @@
 </head>
 <body>
 <div class="container">
-	<p class="title">点击小块可以看到关于这个小块的数据</p>
+	<p class="title">网格</p>
 </div>
 <script src="js/three.min.js"></script>
 <script src="js/renderers/Projector.js"></script>
@@ -47,7 +47,7 @@
 
 <script type="text/javascript">
 /**
- * 这是一个置于3d空间的立方体
+ * 这是一个用three 播放音乐的啥啥啥
  * @author gy 2017
  * 
  */
@@ -58,6 +58,7 @@ var camera,scene,renderer,controls;
 var raycaster;			// 点击发出的一条射线
 var mouse = {
 };	
+
 var meshs = [];
 
 var winWidth = window.innerWidth;
@@ -82,12 +83,58 @@ function init(){
 
 	// 添加相机
 	camera = new THREE.PerspectiveCamera(75, winWidth / winHeight, 1, 10000);
-	camera.position.set(0, 0, 2000);
+	camera.position.set(0, -2500, 1500);
 	camera.lookAt(scene.position);
 
 	// 添加光源
 	var light = new THREE.AmbientLight(0x404040); 
-	scene.add(light);	
+	scene.add(light);
+	var lightDir = new THREE.DirectionalLight( 0xffffff );
+    light.position.set( 0, 1, 1 ).normalize();
+    scene.add(light);	
+
+	// 添加音乐
+	var listener = new THREE.AudioListener();
+	camera.add(listener);
+
+	var sound = new THREE.Audio(listener);
+	var audioLoader = new THREE.AudioLoader();
+	audioLoader.load( 'audio/hwa.mp3', function( buffer ) {
+		sound.setBuffer( buffer );
+		sound.setLoop(true);
+		sound.setVolume(0.5);
+		sound.play();
+	});
+
+	// 放两个音箱
+	// var loader = new THREE.TextureLoader();			// 
+	// var material;
+	// loader.load('textures/bg1.jpg',function(texture){
+	
+	// });
+	var	material =  new THREE.MeshBasicMaterial({
+		map: THREE.ImageUtils.loadTexture('textures/bg.jpg')
+	});
+	var geometry = new THREE.BoxGeometry(500,1000,500);
+
+	var cubeLeft = new THREE.Mesh(geometry, material);
+	var cubeRight = new THREE.Mesh(geometry,material);
+
+	cubeLeft.position.set(540,150,250);
+	cubeRight.position.set(-540,150,250);
+	scene.add( cubeLeft );
+	scene.add( cubeRight );
+
+	var torusGeometry = new THREE.TorusGeometry( 140, 50, 16, 100 );
+	var torusMaterial = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture('textures/lava/cloud.png') } );
+	var torusLeft = new THREE.Mesh( torusGeometry, torusMaterial );
+	var torusRight = new THREE.Mesh( torusGeometry, torusMaterial );
+	torusLeft.position.set(540,-450,250);
+	torusRight.position.set(-540,-450,250);
+	torusLeft.rotation.x = Math.PI / 2;
+	torusRight.rotation.x = Math.PI / 2;
+	scene.add( torusLeft );
+	scene.add( torusRight );
 
 	// 渲染
 	renderer = new THREE.CanvasRenderer();
@@ -99,33 +146,7 @@ function init(){
 	stats = new Stats();
 	container.appendChild(stats.dom);
 
-	// drawLine();
-
-	var geometry = new THREE.BoxGeometry(200, 400, 200);
-	var material = new THREE.MeshBasicMaterial({color:0x00ffff, wireframe: true});
-
-	for(var i = 0; i < 300; i++){
-		var randX = Math.random() * 60 + 2;
-		var randY = Math.random() * 60 + 2;
-		var randZ = Math.random() * 60 + 2;
-		randX = randX.toFixed(0);
-		randY = randY.toFixed(0);
-		randZ = randZ.toFixed(0);
-
-		var geometry = new THREE.BoxGeometry(randX, randY, randZ);
-		mesh  = new THREE.Mesh( geometry, material);
-
-		mesh.position.x = Math.random() * 2000 - 1000;
-		mesh.position.y = Math.random() * 2000 - 1000;
-		mesh.position.z = Math.random() * 2000 - 1000;
-
-		mesh.userData.bid = i;
-
-		meshs.push(mesh);
-		scene.add( mesh);
-	}
-	
-	document.addEventListener( 'click', onDocumentTouchStart, false );
+	drawLine();
 
 	controls = new THREE.TrackballControls( camera, renderer.domElement );
 	controls.speed = 5;
@@ -135,17 +156,8 @@ function init(){
 }
 
 
-// 渲染
-var radius = 600;
-var theta = 0;
-
 function render(){
 	
-
-	theta += 0.1;
-	camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
-	camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
-	camera.position.z = radius * Math.cos( THREE.Math.degToRad( theta ) );
 
 	camera.lookAt(scene.position);
 	camera.updateMatrixWorld();
@@ -158,93 +170,40 @@ function animate(){
 	requestAnimationFrame( animate );
 	render();
 
-	for(var i = 0,len = meshs.length; i < len; i++ ){
-		meshs[i].rotation.x += 0.01;
-    	meshs[i].rotation.y += 0.01;
-	}
-	
 	stats.update();				// fps
 	controls.update();			// control position
 }
 
 
-// mouse 点击事件
-function onDocumentTouchStart( event ) {
-	event.preventDefault();
-
-	eX = event.clientX || event.touches[0].pageX;	// 移动 and PC
-	eY = event.clientY || event.touches[0].pageY;	// 移动 and PC
-	// 乘以2，定义域[－1,1] 然后向x轴负方向移一个位置。因为client.x从左到右
-	mouse.x = ( eX / winWidth ) * 2 - 1; 
-	// 乘以2,值域[－1,1]  然后向y 轴负方向移一个位置，取反因为client.y是上到下，坐标轴反了
-	mouse.y = - ( eY / winHeight ) * 2 + 1;
-	mouse.z = 0.5 ;  // 这个是必要的，有时候还要设为1
-	// console.log( mouse.x, mouse.y );
-
-	// 射线,选中第一个目标并处理
-	raycaster.setFromCamera( mouse, camera );
-	var intersects = raycaster.intersectObjects( scene.children );
-	
-	if( intersects.length > 0 ){		// may do more here
-
-			INTERSECTED.push( intersects[0] );		// 第一个交互的点
-
-			var id = intersects[0].object.userData.bid;	// get attribue
-			
-			showMessage( id);
-		
-	}
-}
-
-
-function showMessage( id){
-
-	poi_x = winWidth/2 + mouse.x * winWidth / 2 ;
-	poi_y = winHeight - ( winHeight/2 + mouse.y * winHeight / 2 );
-
-	var message = document.createElement("p");		// new message element
-	message.className = " message ";
-	message.style.left = poi_x.toFixed(0) + "px";
-	message.style.top = poi_y.toFixed(0) + "px";
-	var text = "id: " + id ;
-	message.innerHTML = text;
-	container.appendChild( message );
-
-	setTimeout(function(){
-		var last = INTERSECTED.shift();
-		container.removeChild( message );
-	},1000);
-}
-
 // // 画一个网格
-// function drawLine() {
+function drawLine() {
 
-// 	var material = new THREE.LineBasicMaterial({
-// 		color: 0xCCCCCC
-// 	});
+	var material = new THREE.LineBasicMaterial({
+		color: 0xCCCCCC
+	});
 	
-// 	for ( var i = -20; i < 20; i++ ){
+	for ( var i = -40; i < 40; i++ ){
 		
-// 		var geometry =  new THREE.Geometry();
-// 		geometry.vertices.push(
-// 			new THREE.Vector3( 50*i, -1000, 0 ),
-// 			new THREE.Vector3( 50*i, 1000, 0 )
-// 		);
-// 		var line = new THREE.Line( geometry, material );
-// 		scene.add( line );
-// 	}
-// 	for ( var j = -20; j < 20; j++ ){
+		var geometry =  new THREE.Geometry();
+		geometry.vertices.push(
+			new THREE.Vector3( 50*i, -1000, 0 ),
+			new THREE.Vector3( 50*i, 1000, 0 )
+		);
+		var line = new THREE.Line( geometry, material );
+		scene.add( line );
+	}
+	for ( var j = -40; j < 40; j++ ){
 		
-// 		var geometry =  new THREE.Geometry();
-// 		geometry.vertices.push(
-// 			new THREE.Vector3( -1000, 50*j, 0 ),
-// 			new THREE.Vector3( 1000, 50*j, 0 )
-// 		);
-// 		var line = new THREE.Line( geometry, material );
-// 		scene.add( line );
-// 	}
+		var geometry =  new THREE.Geometry();
+		geometry.vertices.push(
+			new THREE.Vector3( -1000, 50*j, 0 ),
+			new THREE.Vector3( 1000, 50*j, 0 )
+		);
+		var line = new THREE.Line( geometry, material );
+		scene.add( line );
+	}
 	
-// }
+}
 
 
 

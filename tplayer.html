@@ -35,7 +35,7 @@
 </head>
 <body>
 <div class="container">
-	<p class="title">网格</p>
+	<p class="title">three.js audio 播放音乐和动画</p>
 </div>
 <script src="js/three.min.js"></script>
 <script src="js/renderers/Projector.js"></script>
@@ -48,6 +48,7 @@
 <script type="text/javascript">
 /**
  * 这是一个用three 播放音乐的啥啥啥
+ * 
  * @author gy 2017
  * 
  */
@@ -83,7 +84,7 @@ function init(){
 
 	// 添加相机
 	camera = new THREE.PerspectiveCamera(75, winWidth / winHeight, 1, 10000);
-	camera.position.set(0, -2500, 1500);
+	camera.position.set(0, -2400, 1200);
 	camera.lookAt(scene.position);
 
 	// 添加光源
@@ -107,11 +108,6 @@ function init(){
 	});
 
 	// 放两个音箱
-	// var loader = new THREE.TextureLoader();			// 
-	// var material;
-	// loader.load('textures/bg1.jpg',function(texture){
-	
-	// });
 	var	material =  new THREE.MeshBasicMaterial({
 		map: THREE.ImageUtils.loadTexture('textures/bg.jpg')
 	});
@@ -124,6 +120,33 @@ function init(){
 	cubeRight.position.set(-540,150,250);
 	scene.add( cubeLeft );
 	scene.add( cubeRight );
+
+	// 添加一堆光的栗子栗子
+	// 这里是用一个应用一个别的纹理
+	var spriteMap = new THREE.TextureLoader().load( 'textures/lensflare2.jpg' );
+
+	var particlaMaterial = new THREE.SpriteMaterial( {
+		// map: new THREE.CanvasTexture( generateSprite() ),
+		map: spriteMap,
+		blending: THREE.AdditiveBlending
+	} );
+
+	// var poiLeft = new THREE.Vector3(-500, -600, 400);
+	// var poiRight = new THREE.Vector3(500, -600, 400);
+	// console.log(poiLeft);
+	for ( var i = 0; i < 1000; i++ ) {			// i也是延迟的时间
+
+		particleLeft = new THREE.Sprite( particlaMaterial );
+
+		initLeftParticle( particleLeft, i * 10 );		
+		scene.add( particleLeft );
+
+		particleRight = new THREE.Sprite( particlaMaterial );
+
+		initRightParticle( particleRight, i * 10 );		
+		scene.add( particleRight );
+
+	}
 
 	var torusGeometry = new THREE.TorusGeometry( 140, 50, 16, 100 );
 	var torusMaterial = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture('textures/lava/cloud.png') } );
@@ -139,6 +162,7 @@ function init(){
 	// 渲染
 	renderer = new THREE.CanvasRenderer();
 	renderer.setClearColor(0x000000);
+	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize(winWidth, winHeight);
 	container.append(renderer.domElement);
 
@@ -153,12 +177,71 @@ function init(){
 	controls.noPan = false;
 	controls.noZoom = false;
 
+}	
+
+// 初始化左边光粒,delay等于传入i的大小
+// @todo 两个函数优化成一个
+// 
+function initLeftParticle( particle, delay) {
+
+	var particle = this instanceof THREE.Sprite ? this : particle;		// 循环到底的判断
+	var delay = delay !== undefined ? delay : 0;						
+
+	particle.position.set(-500, -600, 400);
+	particle.scale.x = particle.scale.y = Math.random() * 32 + 16;
+
+	new TWEEN.Tween( particle )						// 此处是有循环的，单个particle的循环
+		.delay( delay )
+		.to( {}, 10000 )
+		.onComplete( initLeftParticle )
+		.start();
+
+	new TWEEN.Tween( particle.position )				// tween particle的位置
+		.delay( delay )
+		.to( { x: Math.random() * 4000 - 2000, y: Math.random() * 1000 - 500, z: Math.random() * 4000 - 2000 }, 10000 )
+		.start();
+
+	new TWEEN.Tween( particle.scale )				// 变大呀
+		.delay( delay )
+		.to( { x: 0.01, y: 0.01 }, 10000 )
+		.start();
+
 }
+
+// 初始化光粒,delay等于传入i的大小
+function initRightParticle( particle, delay) {
+
+	var particle = this instanceof THREE.Sprite ? this : particle;		// 循环到底的判断
+	var delay = delay !== undefined ? delay : 0;						
+
+	particle.position.set( 500, -600, 400);
+	particle.scale.x = particle.scale.y = Math.random() * 32 + 16;
+
+	new TWEEN.Tween( particle )						// 此处是有循环的，单个particle的循环
+		.delay( delay )
+		.to( {}, 10000 )
+		.onComplete( initRightParticle )
+		.start();
+
+	new TWEEN.Tween( particle.position )				// tween particle的位置
+		.delay( delay )
+		.to( { x: Math.random() * 4000 - 2000, y: Math.random() * 1000 - 500, z: Math.random() * 4000 - 2000 }, 10000 )
+		.start();
+
+	new TWEEN.Tween( particle.scale )				// 变大呀
+		.delay( delay )
+		.to( { x: 0.01, y: 0.01 }, 10000 )
+		.start();
+
+}
+
+
+
 
 
 function render(){
 	
-
+	TWEEN.update();
 	camera.lookAt(scene.position);
 	camera.updateMatrixWorld();
 
@@ -171,7 +254,7 @@ function animate(){
 	render();
 
 	stats.update();				// fps
-	controls.update();			// control position
+	controls.update();			// control 位置
 }
 
 

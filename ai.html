@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>three.js</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="description" content="展示一些样例,写一些书籍,干点啥好呢,gy的网站">
+	<meta name="keywords" content="three.js,demos,canvas,webgl,tricks,前端,guoyang,gy134340,web">
+	<link rel="icon" href="img/icon/favicon.png">
+	<link rel="stylesheet" href="css/reset.css">
+	<style>
+		.container{
+			width: 100%;
+			height: 100%;
+			position: relative;
+		}
+		.message{
+			position: absolute;
+			z-index: 999;
+			color:#fff;
+			font-size: 18px;
+		}
+		.title{
+			color:#fff;
+			position: absolute;
+			font-size: 20px;
+			top:10px;
+			-webkit-transform:translateX(-50%);
+			transform: translateX(-50%);
+			left:50%;
+			width: auto;
+			margin: 0 auto;
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+	<p class="title">alphago挑战的第一局棋</p>
+</div>
+<script src="js/three.min.js"></script>
+<script src="js/renderers/Projector.js"></script>
+<script src="js/renderers/CanvasRenderer.js"></script>
+<script src='js/TrackballControls.js'></script>
+<script src="js/stats.min.js"></script>
+<script src='js/Tween.js'></script>
+<script src="js/RequestAnimationFrame.js"></script>
+
+<script type="text/javascript">
+/**
+ * 这是alphago挑战世界的第一局棋
+ * 
+ * @author gy 2017
+ * 
+ */
+
+var data = {
+	1:['c',4],2:['q',16],3:['d',17],4:['q',4],5:['o',3],6:['r',9],7:['c',12],8:['e',4],9:['h',4],10:['c',3],
+	11:['b',3],12:['d',3],13:['b',5],14:['e',6],15:['d',7],16:['e',7],17:['d',8],18:['l',4],19:['h',6],20:['e',8],
+	21:['d',9],22:['h',8],23:['j',8],24:['j',5],25:['h',5],26:['h',7],27:['j',7],28:['j',6],29:['f',5],30:['e',5],
+	31:['k',3],32:['l',3],33:['k',4],34:['l',5],35:['k',5],36:['k',6],37:['l',6],38:['k',7],39:['h',9],40:['g',9],
+	41:['m',6],42:['l',8],43:['g',2],44:['n',4],45:['j',9],46:['g',10],47:['j',11],48:['l',2],49:['e',2],50:['g',12],
+	51:['h',13],52:['f',3],53:['f',2],54:['j',2],55:['h',3],56:['g',13],57:['h',14],58:['j',12],59:['h',12],60:['h',11],
+	61:['k',10],62:['k',12],63:['m',10],64:['m',64],65:['n',10],66:['n',6],67:['l',9],68:['k',8],69:['l',10],70:['g',14],
+	71:['h',15],72:['g',15],73:['h',16],74:['g',16],75:['h',17],76:['g',17],77:['l',13],78:['c',15],79:['o',17],80:['n',7],
+	81:['r',14],82:['q',14],83:['q',13],84:['o',16],85:['n',16],86:['n',17],87:['o',18],88:['r',15],89:['p',14],90:['q',15],
+	91:['p',16],92:['r',13],93:['q',12],94:['h',18],95:['j',18],96:['b',2],97:['k',2],98:['k',1],99:['g',6],100:['g',8],
+	101:['f',4],102:['c',10],103:['d',10],104:['c',11],105:['d',12],106:['d',11],107:['e',11],108:['b',8],109:['b',12],110:['c',6],
+	111:['b',9],112:['b',6],113:['d',113],114:['c',5],115:['c',8],116:['r',3],117:['s',14],118:['s',13],119:['s',12],120:['s',15],
+	121:['b',7],122:['g',18],123:['d',15],124:['k',18],125:['j',17],126:['d',14],127:['e',15],128:['c',16],129:['e',14],130:['d',16],
+	131:['e',16],132:['c',17],133:['e',18],134:['d',18],135:['e',17],136:['d',4],137:['c',18],138:['b',18],139:['d',19],140:['b',19],
+	141:['b',14],142:['b',15],143:['c',14],144:['a',15],145:['r',12],146:['t',14],147:['j',19],148:['e',13],149:['e',12],150:['r',9],
+	151:['m',8],152:['m',7],153:['q',18],154:['q',10],155:['s',17],156:['r',17],157:['r',18],158:['s',16],159:['q',17],160:['s',18],
+	161:['r',16],162:['t',16],163:['p',11],164:['o',9],165:['s',10],166:['s',9],167:['d',17],168:['c',2],169:['a',6],170:['b',4],
+	171:['t',9],172:['t',8],173:['t',10],174:['s',8],175:['n',9],176:['o',10],177:['o',11],178:['e',3],179:['g',3],180:['f',13],
+	181:['d',13],182:['r',10],183:['t',12],184:['t',17],185:['n',8],186:['o',8]
+};
+
+var container,stats;	
+var canavs;
+var camera,scene,renderer,controls;
+var raycaster;			// 点击发出的一条射线
+var mouse = {
+};	
+
+var meshs = [];
+
+var winWidth = window.innerWidth;
+var winHeight = window.innerHeight;
+
+var INTERSECTED = [];	// 鼠标点击的第一个点,以防快速点击，所以用数组保存
+var PI2 = Math.PI * 2;
+
+
+// 初始化
+function init(){
+
+	container = document.querySelectorAll('.container')[0];
+
+	raycaster = new THREE.Raycaster();	// 射线
+	mouse = new THREE.Vector2();	// 点向量
+	mouse.x = 0;
+	mouse.y = 0;
+
+	// 添加scene
+	scene =  new THREE.Scene();
+
+	// 添加相机
+	camera = new THREE.PerspectiveCamera(75, winWidth / winHeight, 1, 10000);
+	camera.position.set(0, 0, -1400);
+	// camera.lookAt(400, 400, 0);
+
+	// 添加光源
+	var light = new THREE.AmbientLight(0x404040); 
+	scene.add(light);
+	var lightDir = new THREE.DirectionalLight( 0xffffff );
+    light.position.set( 0, 1, 1 ).normalize();
+    scene.add(light);	
+
+
+	// 渲染
+	renderer = new THREE.CanvasRenderer();
+	renderer.setClearColor(0x000000);
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize(winWidth, winHeight);
+	container.append(renderer.domElement);
+
+	// 统计
+	stats = new Stats();
+	container.appendChild(stats.dom);
+
+	drawLine();
+
+	controls = new THREE.TrackballControls( camera, renderer.domElement );
+	controls.speed = 5;
+	controls.noPan = false;
+	controls.noZoom = false;
+
+	window.addEventListener( 'resize', onWindowResize, false );
+
+}	
+
+function render(){
+	
+	TWEEN.update();
+	camera.lookAt(scene.position);
+	camera.updateMatrixWorld();
+
+	renderer.render(scene, camera);
+}
+
+
+function animate(){
+	requestAnimationFrame( animate );
+	render();
+
+	stats.update();				// fps
+	controls.update();			// control 位置
+}
+
+function onWindowResize() {
+
+	winWidth = window.innerWidth;
+	winHeight = window.innerHeight;
+	renderer.setPixelRatio( window.devicePixelRatio );
+
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+
+	renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
+
+// // 画一个网格
+function drawLine() {
+
+	var material = new THREE.LineBasicMaterial({
+		color: 0xCCCCCC
+	});
+	
+	for ( var i = 0; i < 20; i++ ){
+		
+		var geometry =  new THREE.Geometry();
+		var tmpLeft = new THREE.Vector3( 50*i, 0, 0 );
+		var tmpRight = new THREE.Vector3( 50*i, 950, 0 );
+		geometry.vertices.push(
+			tmpRight,
+			tmpLeft
+			
+		);
+		var line = new THREE.Line( geometry, material );
+		scene.add( line );
+
+		var sign = String.fromCharCode(116-i);		// number to ASCI
+		var signLeft = setSign(sign);
+		var signRight = setSign(sign);
+		
+		signLeft.position.set(50*i,-30,0);
+		signRight.position.set(50*i,990,0);
+		scene.add(signLeft);
+		scene.add(signRight);
+
+	}
+	for ( var j = 0; j < 20; j++ ){
+		
+		var geometry =  new THREE.Geometry();
+
+		var tmpLeft = new THREE.Vector3( 0, 50*j, 0 );
+		var tmpRight = new THREE.Vector3( 950, 50*j, 0 );
+
+		geometry.vertices.push(
+			tmpRight,
+			tmpLeft
+		);
+		var line = new THREE.Line( geometry, material );
+		scene.add( line );
+
+		var sign = j + '';
+		var signLeft = setSign(sign);
+		var signRight = setSign(sign);
+		
+		signLeft.position.set(-20,50*j,0);
+		signRight.position.set(1010,50*j,0);
+		scene.add(signLeft);
+		scene.add(signRight);
+	}
+	
+}
+
+// add canvas 1-19,a-z
+function setSign(sign){
+	var c;
+
+	var material = new THREE.SpriteCanvasMaterial( {
+		color: new THREE.Color(0x00000),
+		program: function ( context ) {
+			context.font = '20px';
+			context.fillStyle = '#fff';
+			context.fillText(sign, 0, 0);
+		},
+		fog:true, 
+
+	} );
+
+	c = new THREE.Sprite( material );
+	c.position.normalize();
+	c.material.rotation = Math.PI * 7 / 4;
+	c.scale.x = c.scale.y = 3;
+
+	// fucking hack and I do not know why。
+	// fucking gineus hack
+	// c.doubleSided = true;
+	c.scale.y = - 3;
+	return c;
+}
+
+
+// start here
+init();
+animate();
+
+
+
+
+</script>	
+</body>
+</html>

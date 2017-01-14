@@ -18,7 +18,10 @@
 			position: absolute;
 			z-index: 999;
 			color:#fff;
-			font-size: 18px;
+			font-size: 16px;
+			-webkit-transform:translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+
 		}
 		.title{
 			color:#fff;
@@ -35,14 +38,14 @@
 </head>
 <body>
 <div class="container">
-	<p class="title">alphago挑战的第一局棋</p>
+	<p class="title">Alphago's first war with mankind</p>
 </div>
 <script src="js/three.min.js"></script>
 <script src="js/renderers/Projector.js"></script>
 <script src="js/renderers/CanvasRenderer.js"></script>
 <script src='js/TrackballControls.js'></script>
 <script src="js/stats.min.js"></script>
-<script src='js/Tween.js'></script>
+<script src='js/tween.min.js'></script>
 <script src="js/RequestAnimationFrame.js"></script>
 
 <script type="text/javascript">
@@ -75,14 +78,24 @@ var data = {
 	181:['d',13],182:['r',10],183:['t',12],184:['t',17],185:['n',8],186:['o',8]
 };
 
+var pointData = {
+	0:['d',16],1:['k',16],2:['q',16],
+	3:['d',10],4:['k',10],5:['q',10],
+	6:['d',4],7:['k',4],8:['q',4]
+}
+
 var container,stats;	
 var canavs;
 var camera,scene,renderer,controls;
 var raycaster;			// 点击发出的一条射线
-var mouse = {
-};	
+
+var mouse = new THREE.Vector2();	// 点向量
+mouse.x = 0;
+mouse.y = 0;
+
 
 var meshs = [];
+var chesses = [];
 
 var winWidth = window.innerWidth;
 var winHeight = window.innerHeight;
@@ -90,6 +103,40 @@ var winHeight = window.innerHeight;
 var INTERSECTED = [];	// 鼠标点击的第一个点,以防快速点击，所以用数组保存
 var PI2 = Math.PI * 2;
 
+
+// 黑棋
+var programFillBlack = function(context){
+
+	context.beginPath();
+	context.arc( 0, 0, 0.5, 0, PI2, true );
+	var my_gradient = context.createLinearGradient(0,0,0.5,0.5);
+	my_gradient.addColorStop(0,"black");
+	my_gradient.addColorStop(1,"white");
+	context.fillStyle = my_gradient;
+	context.fill();
+}
+
+// 白棋
+var programFillWhite = function(context){
+
+	context.beginPath();
+	context.arc( 0, 0, 0.5, 0, PI2, true );
+	var my_gradient = context.createLinearGradient(0,0,0.5,0.5);
+	my_gradient.addColorStop(0,"white");
+	my_gradient.addColorStop(1,"black");
+	context.fillStyle = my_gradient;
+	context.fill();
+}
+
+//point
+var programFillPoint = function(context){
+
+	context.beginPath();
+	context.arc(0, 0, 0.5, 0, PI2, true);
+	context.fillStyle = 'black';
+	context.closePath();
+	context.fill();
+}
 
 // 初始化
 function init(){
@@ -106,20 +153,20 @@ function init(){
 
 	// 添加相机
 	camera = new THREE.PerspectiveCamera(75, winWidth / winHeight, 1, 10000);
-	camera.position.set(0, 0, -1400);
-	// camera.lookAt(400, 400, 0);
+	camera.position.set(450, 450, 1000);
+	camera.lookAt(450, 450, 0);
 
 	// 添加光源
 	var light = new THREE.AmbientLight(0x404040); 
 	scene.add(light);
-	var lightDir = new THREE.DirectionalLight( 0xffffff );
+	var lightDir = new THREE.DirectionalLight( 0xcccccc );
     light.position.set( 0, 1, 1 ).normalize();
     scene.add(light);	
 
 
 	// 渲染
 	renderer = new THREE.CanvasRenderer();
-	renderer.setClearColor(0x000000);
+	renderer.setClearColor(0x444444);
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize(winWidth, winHeight);
 	container.append(renderer.domElement);
@@ -128,21 +175,33 @@ function init(){
 	stats = new Stats();
 	container.appendChild(stats.dom);
 
-	drawLine();
+	drawLine();			// 画棋盘
+
+	setGo();			// 添加棋子
 
 	controls = new THREE.TrackballControls( camera, renderer.domElement );
 	controls.speed = 5;
 	controls.noPan = false;
 	controls.noZoom = false;
+	controls.rotateSpeed = 1.0;
+	controls.zoomSpeed = 1.2;
+	controls.panSpeed = 0.8;
+
+	controls.noZoom = false;
+	controls.noPan = false;
+
+	controls.staticMoving = true;
+	controls.dynamicDampingFactor = 0.3;
 
 	window.addEventListener( 'resize', onWindowResize, false );
+	document.addEventListener( 'click', onDocumentTouchStart, false );
 
 }	
 
 function render(){
 	
 	TWEEN.update();
-	camera.lookAt(scene.position);
+	camera.lookAt(450,450,0);
 	camera.updateMatrixWorld();
 
 	renderer.render(scene, camera);
@@ -151,10 +210,12 @@ function render(){
 
 function animate(){
 	requestAnimationFrame( animate );
+	TWEEN.update();
 	render();
 
 	stats.update();				// fps
 	controls.update();			// control 位置
+	
 }
 
 function onWindowResize() {
@@ -162,21 +223,96 @@ function onWindowResize() {
 	winWidth = window.innerWidth;
 	winHeight = window.innerHeight;
 	renderer.setPixelRatio( window.devicePixelRatio );
-
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
-
 	renderer.setSize( window.innerWidth, window.innerHeight );
-
 }
 
-// // 画一个网格
+// add go
+function setGo() {
+	var tmpProgram;
+	var dir;
+
+	for(var i = 1;i <= 186;i ++ ){				// 总共186步
+		if(i % 2 == 0){					// 白棋
+			dir = 'right';
+			tmpProgram = programFillWhite;
+		}else{							// 黑棋
+			dir = 'left';
+			tmpProgram = programFillBlack;
+		}
+
+		var material = new THREE.SpriteCanvasMaterial( {
+			color: new THREE.Color(0x00000),
+			program: tmpProgram,
+			transparent: false
+		});
+		
+		go = new THREE.Sprite( material );
+		go.scale.x = go.scale.y = 40;
+		go.userData.number = i;
+		var goX = data[i][0];
+		var goY = data[i][1];
+		goX = goX.charCodeAt('0') - 97;
+		goX = goX * 50;
+		goY = parseInt(goY) * 50;
+		go.position.set(10000, 10000, 0);
+	
+		// add tween
+		enableTween(go, goX, goY, dir);
+		scene.add(go);
+	}
+
+	// tween chain
+	for(var j = 0; j < chesses.length-1; j++ ){
+		var tmpChain = chesses[j];
+		var nextChain = chesses[j+1];
+		tmpChain.chain(nextChain);
+	}
+	chesses[0].start();
+}
+
+// 添加渐变
+function enableTween(go, goX, goY, dir) {
+	var updateCallback = function() {
+		this.domElement.position.x = this.x ;
+		this.domElement.position.y = this.y ;
+		this.domElement.position.z = this.z ;
+	};
+	if(dir == 'right'){
+		var coords = { x:1000, y:600, z:Math.random()*200, domElement:go};
+	}else{
+		var coords = { x:-1000, y:600, z:Math.random()*200, domElement:go};
+	}
+			
+	var tween = new TWEEN.Tween(coords)
+		.to({
+			x: goX,
+			y: goY,
+			z: 0,
+		},Math.random()*500)
+		.onUpdate(updateCallback)
+		.easing( TWEEN.Easing.Exponential.InOut );
+	chesses.push(tween);
+}
+
+// 画一个网格
 function drawLine() {
 
 	var material = new THREE.LineBasicMaterial({
 		color: 0xCCCCCC
 	});
-	
+		
+
+	setXaxis(material);
+	setYaxis(material);
+	addPoint();					// 添加棋盘小黑点
+}
+
+// x
+function setXaxis(m){
+	var material = m;
+
 	for ( var i = 0; i < 20; i++ ){
 		
 		var geometry =  new THREE.Geometry();
@@ -190,7 +326,7 @@ function drawLine() {
 		var line = new THREE.Line( geometry, material );
 		scene.add( line );
 
-		var sign = String.fromCharCode(116-i);		// number to ASCI
+		var sign = String.fromCharCode(97+i);		// number to ASCI
 		var signLeft = setSign(sign);
 		var signRight = setSign(sign);
 		
@@ -200,6 +336,12 @@ function drawLine() {
 		scene.add(signRight);
 
 	}
+}
+
+// y
+function setYaxis(m){
+	var material = m;
+
 	for ( var j = 0; j < 20; j++ ){
 		
 		var geometry =  new THREE.Geometry();
@@ -218,12 +360,33 @@ function drawLine() {
 		var signLeft = setSign(sign);
 		var signRight = setSign(sign);
 		
-		signLeft.position.set(-20,50*j,0);
-		signRight.position.set(1010,50*j,0);
+		signLeft.position.set(-60,50*j,0);
+		signRight.position.set(970,50*j,0);
 		scene.add(signLeft);
 		scene.add(signRight);
 	}
-	
+}
+
+//point
+function addPoint(){
+
+	var material = new THREE.SpriteCanvasMaterial( {
+		color: new THREE.Color(0x000000),
+		program: programFillPoint
+	} );
+	for(var i = 0; i < 9; i++){
+		var point = new THREE.Sprite( material );
+		var pointX = pointData[i][0];
+		var pointY = pointData[i][1];
+		pointX = pointX.charCodeAt('0') - 97;
+		pointX = pointX * 50;
+		pointY = parseInt(pointY) * 50;
+		point.scale.x = point.scale.y = 15;			// 视觉差异不像圆
+		point.position.normalize();
+		point.position.set(pointX, pointY, 0);
+		scene.add(point);
+		// console.log(point);
+	}
 }
 
 // add canvas 1-19,a-z
@@ -231,13 +394,12 @@ function setSign(sign){
 	var c;
 
 	var material = new THREE.SpriteCanvasMaterial( {
-		color: new THREE.Color(0x00000),
+		color: new THREE.Color(0x000000),
 		program: function ( context ) {
 			context.font = '20px';
 			context.fillStyle = '#fff';
 			context.fillText(sign, 0, 0);
 		},
-		fog:true, 
 
 	} );
 
@@ -247,15 +409,70 @@ function setSign(sign){
 	c.scale.x = c.scale.y = 3;
 
 	// fucking hack and I do not know why。
-	// fucking gineus hack
+	// gineus hack gineus gineus ginues
 	// c.doubleSided = true;
 	c.scale.y = - 3;
 	return c;
 }
 
+// mouse 点击事件
+function onDocumentTouchStart( event ) {
+	event.preventDefault();
+
+	eX = event.clientX || event.touches[0].pageX;	// 移动 and PC
+	eY = event.clientY || event.touches[0].pageY;	// 移动 and PC
+	// 乘以2，定义域[－1,1] 然后向x轴负方向移一个位置。因为client.x从左到右
+	mouse.x = ( eX / winWidth ) * 2 - 1; 
+	// 乘以2,值域[－1,1]  然后向y 轴负方向移一个位置，取反因为client.y是上到下，坐标轴反了
+	mouse.y = - ( eY / winHeight ) * 2 + 1;
+	mouse.z = 0.5 ;  // 这个是必要的，有时候还要设为1
+	// console.log( mouse.x, mouse.y );
+
+	// 射线,选中第一个目标并处理
+	raycaster.setFromCamera( mouse, camera );
+	var intersects = raycaster.intersectObjects( scene.children );
+	
+	if( intersects.length > 0 ){		// may do more here
+
+			INTERSECTED.push( intersects[0] );		// 第一个交互的点
+
+			var number = intersects[0].object.userData.number;	// get attribue
+			if(number){
+				showMessage(number);	
+			}		
+	}
+}
+
+function showMessage(number){
+	poi_x = winWidth/2 + mouse.x * winWidth / 2 ;
+	poi_y = winHeight - ( winHeight/2 + mouse.y * winHeight / 2 ) ;
+
+	var message = document.createElement("p");		// new message element
+	message.className = " message ";
+	message.style.left = poi_x.toFixed(0) + "px";
+	message.style.top = poi_y.toFixed(0) + "px";
+
+	if(number%2 == 0){			// alphago
+		message.style.color = '#000000';
+	}else{						// 李世石
+		message.style.color = '#ffffff';
+	}
+
+	var text = number ;
+	message.innerHTML = text;
+	container.appendChild( message );
+
+	setTimeout(function(){
+		var last = INTERSECTED.shift();
+		container.removeChild( message );
+	},1000);
+
+
+}
 
 // start here
 init();
+
 animate();
 
 

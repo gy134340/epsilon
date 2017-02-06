@@ -165,10 +165,10 @@ function init(){
 
 
 	// 渲染
-	renderer = new THREE.CanvasRenderer();
+	renderer = new THREE.CanvasRenderer( {antialias: true} );
 	renderer.setClearColor(0x444444);
 	renderer.setPixelRatio( window.devicePixelRatio );
-	renderer.setSize(winWidth, winHeight);
+	renderer.setSize( window.innerWidth, window.innerHeight );
 	container.append(renderer.domElement);
 
 	// 统计
@@ -186,10 +186,6 @@ function init(){
 	controls.rotateSpeed = 1.0;
 	controls.zoomSpeed = 1.2;
 	controls.panSpeed = 0.8;
-
-	controls.noZoom = false;
-	controls.noPan = false;
-
 	controls.staticMoving = true;
 	controls.dynamicDampingFactor = 0.3;
 
@@ -200,10 +196,10 @@ function init(){
 
 function render(){
 	
-	TWEEN.update();
+	
 	camera.lookAt(450,450,0);
-	camera.updateMatrixWorld();
-
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );			// need here
 	renderer.render(scene, camera);
 }
 
@@ -211,6 +207,7 @@ function render(){
 function animate(){
 	requestAnimationFrame( animate );
 	TWEEN.update();
+
 	render();
 
 	stats.update();				// fps

@@ -1,5 +1,3 @@
-<!-- 这是可以通用的html部分 -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,6 +33,16 @@
 			width: auto;
 			margin: 0 auto;
 		}
+	 	canvas{
+	 		display:block;
+	 		position: fixed;
+	 		left:0;
+	 		top:0;
+	 		z-index: 99;
+	 	}
+		#num_img{
+			display: none;
+		}
 
 	</style>
 </head>
@@ -53,12 +61,13 @@
 <script src="js/RequestAnimationFrame.js"></script>
 <script type="text/javascript">
 
-
 var container,stats;	
-var canavs;
+var canvas,canvasWidth,canvasHeight;
 var camera,scene,renderer,controls;
 var raycaster;			// 点击发出的一条射线
+var imgData,numData = [];
 var mouse = new THREE.Vector2();	// 点向量
+var glImg;
 
 var winWidth = window.innerWidth;
 var winHeight = window.innerHeight;
@@ -68,12 +77,12 @@ mouse.y = 0;
 
 function init () {
 	container = document.querySelectorAll('.container')[0];
-
-	scene = new THREE.scene();
+	glImg = document.getElementById('num_img');
+	scene = new THREE.Scene();
 
 	// 相机
 	camera = new THREE.PerspectiveCamera(60, winWidth / winHeight, 1, 10000);
-	camera.position.set(0, 0, 1000);
+	camera.position.set(0, 0, 2000);
 	camera.lookAt(0, 0, 0);
 
 	// 光
@@ -103,7 +112,75 @@ function init () {
 	controls.staticMoving = true;
 	controls.dynamicDampingFactor = 0.3;
 
+
+	canvas = document.createElement('canvas');
+
+	canvasWidth = glImg.naturalWidth;
+	canvasHeight = glImg.naturalHeight;
+	canvas.setAttribute('width', canvasWidth);
+	canvas.setAttribute('height', canvasHeight);
+
+	var context = canvas.getContext('2d');
+	context.drawImage(glImg, 0, 0, canvasWidth, canvasHeight)
+	container.append(canvas);
+
+	getImageData(context, canvasWidth, canvasHeight);			// 获取img小块数据
+
+	setSprites(canvasWidth, canvasHeight);
+	
+	// helper
+	var axisHelper = new THREE.AxisHelper( 1000 );
+	scene.add( axisHelper );
+	var gridHelper = new THREE.GridHelper( 100, 100 );
+	scene.add( gridHelper );
+
 	window.addEventListener( 'resize', onWindowResize, false );
+}
+
+// 470 * 300
+function getImageData(context, imgWidth, imgHeight){
+	var tmpWidth = imgWidth-1;
+	var tmpHeight = imgHeight-1;
+
+	for(var i = 0; i < tmpWidth; i += 4 ){
+		for(var j = 0; j < tmpHeight; j += 4){
+			var dt = context.getImageData(i, j, 4, 4);
+			var rate = getThresh(dt);
+
+			numData.push(rate);
+		}
+	}
+}
+
+function setSprites (canvasWidth, canvasHeight) {
+
+	for(var i = 0; i < canvasWidth; i++){
+		for(var j = 0; j < canvasHeight; j++){
+			// console.log(numData[i * canvasWidth + j]);
+			var color = numData[i * canvasWidth + j] / 3;
+			grey = color.toString(16);
+			greyAll = '0x' + grey + grey + grey;
+
+			var spriteMaterial = new THREE.SpriteMaterial( {color:greyAll});
+			var sprite = new THREE.Sprite( spriteMaterial );
+			sprite.position.set(i*10, j*10, 0);
+			sprite.scale.x = sprite.scale.y = sprite.scale.z = 10;
+			scene.add( sprite );
+		}
+	}
+}
+
+// 获取每个块的颜色相加值
+function getThresh( dt ){
+	var data = dt.data;
+	var dataLength = data.length;
+	var total = 0;
+	for(var i = 0; i < dataLength; i+=4){
+		tmp = (data[i] + data[i+1] + data[i+3]) / 3;
+		total += parseInt(tmp);
+	}
+	total = total / dataLength * 3 / 4;
+	return parseInt(total);
 }
 
 function render(){
@@ -125,6 +202,7 @@ function animate () {
 init();
 animate();
 
+
 function onWindowResize(){
 
 	renderer.setPixelRatio( window.devicePixelRatio );
@@ -145,4 +223,20 @@ function threshold(value){
 
 </script>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

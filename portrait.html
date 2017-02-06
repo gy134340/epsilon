@@ -67,6 +67,7 @@ var camera,scene,renderer,controls;
 var raycaster;			// 点击发出的一条射线
 var imgData,numData = [];
 var mouse = new THREE.Vector2();	// 点向量
+var cp = [];
 var glImg;
 
 var winWidth = window.innerWidth;
@@ -82,7 +83,7 @@ function init () {
 
 	// 相机
 	camera = new THREE.PerspectiveCamera(60, winWidth / winHeight, 1, 10000);
-	camera.position.set(0, 0, 2000);
+	camera.position.set(0, 0, 1500);
 	camera.lookAt(0, 0, 0);
 
 	// 光
@@ -114,6 +115,7 @@ function init () {
 
 
 	canvas = document.createElement('canvas');
+	canvas.style.display = 'none';
 
 	canvasWidth = glImg.naturalWidth;
 	canvasHeight = glImg.naturalHeight;
@@ -125,7 +127,7 @@ function init () {
 	container.append(canvas);
 
 	getImageData(context, canvasWidth, canvasHeight);			// 获取img小块数据
-
+	// console.log('numData',numData);
 	setSprites(canvasWidth, canvasHeight);
 	
 	// helper
@@ -142,48 +144,71 @@ function getImageData(context, imgWidth, imgHeight){
 	var tmpWidth = imgWidth-1;
 	var tmpHeight = imgHeight-1;
 
-	for(var i = 0; i < tmpWidth; i += 4 ){
-		for(var j = 0; j < tmpHeight; j += 4){
-			var dt = context.getImageData(i, j, 4, 4);
+	for(var i = 0; i < tmpWidth; i += 2 ){
+		for(var j = 0; j < tmpHeight; j += 2){
+			var dt = context.getImageData(i, j, 1, 1);
 			var rate = getThresh(dt);
 
 			numData.push(rate);
 		}
 	}
+	
 }
 
 function setSprites (canvasWidth, canvasHeight) {
 
-	for(var i = 0; i < canvasWidth; i++){
-		for(var j = 0; j < canvasHeight; j++){
-			// console.log(numData[i * canvasWidth + j]);
-			var color = numData[i * canvasWidth + j] / 3;
-			grey = color.toString(16);
-			greyAll = '0x' + grey + grey + grey;
+	for(var i = 0; i < canvasWidth; i+=2){
+		for(var j = 0; j < canvasHeight; j+=2){
 
-			var spriteMaterial = new THREE.SpriteMaterial( {color:greyAll});
-			var sprite = new THREE.Sprite( spriteMaterial );
-			sprite.position.set(i*10, j*10, 0);
-			sprite.scale.x = sprite.scale.y = sprite.scale.z = 10;
-			scene.add( sprite );
+			var color = numData[i/2 * canvasHeight+ j/2];
+			if(color !== undefined){
+				grey = color.toString(16);
+				greyAll = '#'+ grey + grey + grey ;
+
+				var spriteMaterial = new THREE.SpriteMaterial( {color:greyAll});
+				var sprite = new THREE.Sprite( spriteMaterial );
+				var z = Math.sin(j/8) * 20;
+				
+				sprite.position.set(-(i-canvasWidth/4)*10, -(j-canvasHeight/2)*5, z);
+				sprite.scale.x = sprite.scale.y = sprite.scale.z = 10;
+				cp.push(sprite);
+				scene.add( sprite );
+			}
+			
 		}
 	}
 }
 
+
+function flowSprite(){
+
+	for(var i = 0; i < canvasWidth; i+=2){
+		for(var j = 0; j < canvasHeight; j+=2){
+
+			var tmp = cp[i/2*canvasHeight + j/2];
+			if(tmp){
+				if(tmp.position.z <= 20){
+					tmp.position.z += Math.random()*2;
+				}else{
+					tmp.position.z -= 40;
+				}
+				
+			}
+		}
+	}
+}
+
+
 // 获取每个块的颜色相加值
 function getThresh( dt ){
+
 	var data = dt.data;
-	var dataLength = data.length;
-	var total = 0;
-	for(var i = 0; i < dataLength; i+=4){
-		tmp = (data[i] + data[i+1] + data[i+3]) / 3;
-		total += parseInt(tmp);
-	}
-	total = total / dataLength * 3 / 4;
-	return parseInt(total);
+	tmp = (data[1] + data[2] + data[3]) / 3;	
+	return parseInt(tmp);
 }
 
 function render(){
+	flowSprite();
 	camera.lookAt(scene.position);
 	camera.updateProjectionMatrix();
 

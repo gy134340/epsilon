@@ -1,0 +1,257 @@
+<!-- 这是可以通用的html部分 -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta name="description" content="展示一些样例,写一些书籍,干点啥好呢,gy的网站">
+	<meta name="keywords" content="three.js,demos,canvas,webgl,tricks,前端,guoyang,gy134340,web">
+	<link rel="icon" href="img/icon/favicon.png">
+	<link rel="stylesheet" href="css/reset.css">
+	<style>
+		.container{
+			width: 100%;
+			height: 100%;
+			position: relative;
+		}
+		.message{
+			position: absolute;
+			z-index: 999;
+			color:#fff;
+			font-size: 16px;
+			-webkit-transform:translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+
+		}
+		.title{
+			color:#fff;
+			position: absolute;
+			font-size: 20px;
+			top:10px;
+			-webkit-transform:translateX(-50%);
+			transform: translateX(-50%);
+			left:50%;
+			width: auto;
+			margin: 0 auto;
+		}
+
+	</style>
+</head>
+<body>
+<div class="container">
+	<p class="title"> threebody planet</p>
+</div>
+</body>
+<script src="js/three.min.js"></script>
+<script src="js/renderers/Projector.js"></script>
+<script src="js/renderers/CanvasRenderer.js"></script>
+<script src='js/TrackballControls.js'></script>
+<script src="js/stats.min.js"></script>
+<script src='js/tween.min.js'></script>
+<script src="js/RequestAnimationFrame.js"></script>
+<script type="text/javascript">
+
+
+var container,stats;	
+var canavs;
+var camera,scene,renderer,controls;
+var raycaster;			// 点击发出的一条射线
+var mouse = new THREE.Vector2();	// 点向量
+
+var winWidth = window.innerWidth;
+var winHeight = window.innerHeight;
+
+var star1, star2, star3;
+var light1, light2, light3;
+mouse.x = 0;
+mouse.y = 0;
+
+
+function init () {
+	container = document.querySelectorAll('.container')[0];
+
+	scene = new THREE.Scene();
+
+	// 相机
+	camera = new THREE.PerspectiveCamera(60, winWidth / winHeight, 1, 10000);
+	camera.position.set(0, 0, 800);
+	camera.lookAt(0, 0, 0);
+
+	// 光
+	var light = new THREE.AmbientLight(0x404040); 
+	scene.add(light);
+
+	var sphereGeometry = new THREE.SphereGeometry(10, 20, 20);
+	var sphereTexture = new THREE.TextureLoader().load('img/planets/star.jpg');
+	var sphereMaterial = new THREE.MeshPhongMaterial({map:sphereTexture});
+	sphereMaterial.transparent = true;
+	sphereMaterial.opacity = 0.9;
+	sphereMaterial.side = THREE.DoubleSide;
+	sphereMaterial.needsUpdate = true;
+	var sphere =  new THREE.Mesh(sphereGeometry, sphereMaterial);
+	sphere.position.set(50,50,-50);
+	scene.add( sphere );
+	var starGeometry = new THREE.SphereGeometry(30, 40, 40);
+	var starTexture = new THREE.TextureLoader().load('img/planets/1.jpg');
+	var starMaterial = new THREE.MeshPhongMaterial({map:starTexture});
+	// starMaterial.transparent = true;
+	// starMaterial.opacity = 0.5;
+	starMaterial.side = THREE.DoubleSide;
+	starMaterial.needsUpdate = true;
+	star1 = new THREE.Mesh(starGeometry, starMaterial);
+	star2 = new THREE.Mesh(starGeometry, starMaterial);
+	star3 = new THREE.Mesh(starGeometry, starMaterial);
+	light1 = new THREE.PointLight( 0xff7b1c, 0.8, 0 );
+	light2 = new THREE.PointLight( 0xff7b1c, 0.8, 0 );
+	light3 = new THREE.PointLight( 0xff7b1c, 0.8, 0 );
+
+	star1.position.set(0, 0, 0);
+	light1.position.set(0, 0, 0);
+	star2.position.set(0, 0, 0);
+	light2.position.set(0, 0, 0);
+	star3.position.set(0, 0, 0);
+	light3.position.set(0, 0, 0);
+	scene.add(star1);
+	scene.add(star2);
+	scene.add(star3);
+	scene.add(light1);
+	scene.add(light2);
+	scene.add(light3);
+	addSprites(1000);
+	// renderer 
+	renderer = new THREE.WebGLRenderer( {antialias: true} );
+	renderer.setClearColor(0x000);
+	renderer.setPixelRatio(window.devivePixelRatio);
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	container.append(renderer.domElement);
+
+	// 统计
+	stats = new Stats();
+	container.appendChild(stats.dom);
+
+	// 控制器
+	controls = new THREE.TrackballControls( camera, renderer.domElement );
+	controls.speed = 5;
+	controls.noPan = false;
+	controls.noZoom = false;
+	controls.rotateSpeed = 1.0;
+	controls.zoomSpeed = 1.2;
+	controls.panSpeed = 0.8;
+
+	controls.staticMoving = true;
+	controls.dynamicDampingFactor = 0.3;
+
+	window.addEventListener( 'resize', onWindowResize, false );
+}
+
+var spriteMap = new THREE.TextureLoader().load( 'textures/lensflare/1.png' );
+var particlaMaterial = new THREE.SpriteMaterial( {
+	map: spriteMap,
+	color: 0x6C5F19
+	// blending: THREE.AdditiveBlending
+} );
+
+function addSprites(num){
+	for(var i = 0; i < num; i++){
+		particle = new THREE.Sprite( particlaMaterial );
+		particle.position.x = Math.random() * 4000 - 2000;
+		particle.position.y = Math.random() * 4000 - 2000;
+		var flag = Math.random() > 0.5 ? 1 : -1;
+		particle.position.z = flag  * (Math.random() * 4000 + 400);
+		particle.scale.x = particle.scale.y = 40; 
+		scene.add( particle );
+	}
+}
+
+
+var delta1 = 0;
+var delta2 = 180;
+var delta3 = 270;
+
+// 恒星的轨迹
+function starMove(){
+	delta1 += 0.2;
+	delta2 += 0.6;
+	delta3 += 0.4;
+	var position1 = new THREE.Vector3(
+		300 * Math.cos(THREE.Math.degToRad(delta1)),
+		300 * Math.sin(THREE.Math.degToRad(delta1)),
+		0
+	)
+	var position2 = new THREE.Vector3(
+		0,
+		300 * Math.cos(THREE.Math.degToRad(delta2)),
+		300 * Math.sin(THREE.Math.degToRad(delta2))
+	)
+	var position3 = new THREE.Vector3(
+		300 * Math.sin(THREE.Math.degToRad(delta3)),
+		0,
+		300 * Math.cos(THREE.Math.degToRad(delta3))
+	)
+    	
+    star1.position.x = position1.x;
+    star1.position.y = position1.y;
+    star1.position.z = position1.z;
+    light1.position.x = position1.x;
+    light1.position.y = position1.y;
+    light1.position.z = position1.z;
+    star2.position.x = position2.x;
+    star2.position.y = position2.y;
+    star2.position.z = position2.z;
+    light2.position.x = position2.x;
+    light2.position.y = position2.y;
+    light2.position.z = position2.z;
+    star3.position.x = position3.x;
+    star3.position.y = position3.y;
+    star3.position.z = position3.z;
+    light3.position.x = position3.x;
+    light3.position.y = position3.y;
+    light3.position.z = position3.z;
+
+   
+     
+    
+}
+
+function render(){
+	starMove();
+	camera.lookAt(scene.position);
+	camera.updateProjectionMatrix();
+
+	renderer.render(scene, camera);
+}
+
+function animate () {
+	requestAnimationFrame(animate);
+
+	render();
+	TWEEN.update();
+	stats.update();
+	controls.update();
+}
+
+init();
+animate();
+
+function onWindowResize(){
+
+	renderer.setPixelRatio( window.devicePixelRatio );
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+
+	
+function fastAbs(value){
+	return (value ^ (value >> 31)) - (value >> 31);
+}
+
+function threshold(value){
+	return (value > 0x15) ? 0xFF : 0;
+}
+
+</script>
+</html>
+

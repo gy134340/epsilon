@@ -109,7 +109,7 @@ function init(){
 
 	// 放两个音箱
 	var	material =  new THREE.MeshBasicMaterial({
-		map: THREE.ImageUtils.loadTexture('textures/bg.jpg')
+		map: new THREE.TextureLoader().load('textures/bg.jpg')
 	});
 	var geometry = new THREE.BoxGeometry(500,1000,500);
 
@@ -149,7 +149,7 @@ function init(){
 	}
 
 	var torusGeometry = new THREE.TorusGeometry( 140, 50, 16, 100 );
-	var torusMaterial = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture('textures/lava/cloud.png') } );
+	var torusMaterial = new THREE.MeshBasicMaterial( { map: new THREE.TextureLoader().load('textures/lava/cloud.png') } );
 	var torusLeft = new THREE.Mesh( torusGeometry, torusMaterial );
 	var torusRight = new THREE.Mesh( torusGeometry, torusMaterial );
 	torusLeft.position.set(540,-450,250);

@@ -74,7 +74,7 @@ function init () {
 
 	// 相机
 	camera = new THREE.PerspectiveCamera(60, winWidth / winHeight, 1, 10000);
-	camera.position.set(0, 0, 500);
+	camera.position.set(0, 0, 800);
 	camera.lookAt(0, 0, 0);
 
 	// 光
@@ -111,7 +111,7 @@ function init () {
 		line.material.depthTest = false;
 		line.material.opacity = 0.25;
 		line.material.transparent = true;
-		line.position.set(-600,0,0);
+		line.position.set(-500,0,0);
 		scene.add( line );
 
 	}).catch(function(error){

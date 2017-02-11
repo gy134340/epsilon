@@ -203,7 +203,10 @@ function flowDown(){
 	for(var i = 0, len = meshs.length; i < len; i++){
 		var cube = meshs[i];
 
-		new TWEEN.Tween(cube.position).to({y:0},Math.sqrt(cube.position.y) * 100).start();
+		new TWEEN.Tween(cube.position)
+			.to({y:0},Math.sqrt(cube.position.y) * 100)
+			// .easing( TWEEN.Easing.Elastic.In )
+			.start();
 	}	
 
 	return new Promise(function(resolve,reject){
@@ -215,13 +218,16 @@ function flowDown(){
 
 function flowUp(){
 
-	var rand = 400 * Math.random();
+	var rand = 400 * Math.random() - 400;
 	for(var i = 0, len = meshs.length; i < len; i++){
 		var cube = meshs[i];
 		var originY = cube.userData.originY;
 		var originX = cube.userData.originX;
 		var originZ = cube.userData.originZ;
-		new TWEEN.Tween(cube.position).to({x:originX+rand,y:originY,z:originZ+rand},Math.sqrt(originY) * 150).start();
+		new TWEEN.Tween(cube.position)
+			.to({x:originX+rand,y:originY,z:originZ+rand},Math.sqrt(originY) * 150)
+			// .easing( TWEEN.Easing.Elastic.Out )
+			.start();
 	}
 
 	return new Promise(function(resolve,reject){

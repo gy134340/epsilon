@@ -1,6 +1,4 @@
-# epsilon
-my website &amp; demos
-
+### from this repository
 [小方块](http://epsilon.space/tbox.html)
 
 [几何图形与粒子](http://epsilon.space/tplayer.html)
@@ -14,5 +12,8 @@ my website &amp; demos
 [恒星与点光源](http://epsilon.space/threebody.html)
 
 [粒子geometry](http://epsilon.space/particle.html)
+
+
+### from paint repository
 
 [3d空间的小画板](http://www.134340.space/)

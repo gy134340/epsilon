@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>three.js</title>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<meta name="description" content="展示一些样例,写一些书籍,干点啥好呢,gy的网站">
+	<meta name="description" content="展示一些样例,写一些书籍,gy的网站">
 	<meta name="keywords" content="three.js,demos,canvas,webgl,tricks,前端,guoyang,gy134340,web">
 	<link rel="icon" href="img/icon/favicon.png">
 	<link rel="stylesheet" href="css/reset.css">
@@ -67,7 +67,6 @@ var winHeight = window.innerHeight;
 
 var INTERSECTED = [];	// 鼠标点击的第一个点,以防快速点击，所以用数组保存
 var PI2 = Math.PI * 2;
-
 
 // 初始化
 function init(){
@@ -183,7 +182,6 @@ function init(){
 // @todo 两个函数优化成一个
 // 
 function initLeftParticle( particle, delay) {
-
 	var particle = this instanceof THREE.Sprite ? this : particle;		// 循环到底的判断
 	var delay = delay !== undefined ? delay : 0;						
 
@@ -210,7 +208,6 @@ function initLeftParticle( particle, delay) {
 
 // 初始化光粒,delay等于传入i的大小
 function initRightParticle( particle, delay) {
-
 	var particle = this instanceof THREE.Sprite ? this : particle;		// 循环到底的判断
 	var delay = delay !== undefined ? delay : 0;						
 
@@ -235,19 +232,13 @@ function initRightParticle( particle, delay) {
 
 }
 
-
-
-
-
-function render(){
-	
+function render(){	
 	TWEEN.update();
 	camera.lookAt(scene.position);
 	camera.updateMatrixWorld();
 
 	renderer.render(scene, camera);
 }
-
 
 function animate(){
 	requestAnimationFrame( animate );
@@ -260,13 +251,11 @@ function animate(){
 
 // // 画一个网格
 function drawLine() {
-
 	var material = new THREE.LineBasicMaterial({
 		color: 0xCCCCCC
 	});
 	
-	for ( var i = -40; i < 40; i++ ){
-		
+	for ( var i = -40; i < 40; i++ ){	
 		var geometry =  new THREE.Geometry();
 		geometry.vertices.push(
 			new THREE.Vector3( 50*i, -1000, 0 ),
@@ -275,8 +264,8 @@ function drawLine() {
 		var line = new THREE.Line( geometry, material );
 		scene.add( line );
 	}
-	for ( var j = -40; j < 40; j++ ){
-		
+
+	for ( var j = -40; j < 40; j++ ){	
 		var geometry =  new THREE.Geometry();
 		geometry.vertices.push(
 			new THREE.Vector3( -1000, 50*j, 0 ),
@@ -288,26 +277,9 @@ function drawLine() {
 	
 }
 
-
-
 // start here
 init();
 animate();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 </script>	
 </body>

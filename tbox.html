@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>three.js</title>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<meta name="description" content="展示一些样例,写一些书籍,干点啥好呢,gy的网站">
+	<meta name="description" content="展示一些样例,写一些书籍,gy的网站">
 	<meta name="keywords" content="three.js,demos,canvas,webgl,tricks,前端,guoyang,gy134340,web">
 	<link rel="icon" href="img/icon/favicon.png">
 	<link rel="stylesheet" href="css/reset.css">
@@ -51,7 +51,6 @@
  * @author gy 2017
  * 
  */
-
 var container,stats;	
 var canavs;
 var camera,scene,renderer,controls;
@@ -65,7 +64,6 @@ var winHeight = window.innerHeight;
 
 var INTERSECTED = [];	// 鼠标点击的第一个点,以防快速点击，所以用数组保存
 var PI2 = Math.PI * 2;
-
 
 // 初始化
 function init(){
@@ -99,7 +97,6 @@ function init(){
 	stats = new Stats();
 	container.appendChild(stats.dom);
 
-
 	var geometry = new THREE.BoxGeometry(200, 400, 200);
 	var material = new THREE.MeshBasicMaterial({color:0x00ffff, wireframe: true});
 
@@ -117,7 +114,6 @@ function init(){
 		mesh.position.x = Math.random() * 2000 - 1000;
 		mesh.position.y = Math.random() * 2000 - 1000;
 		mesh.position.z = Math.random() * 2000 - 1000;
-
 		mesh.userData.bid = i;
 
 		meshs.push(mesh);
@@ -139,8 +135,6 @@ var radius = 600;
 var theta = 0;
 
 function render(){
-	
-
 	theta += 0.1;
 	camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
 	camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
@@ -148,10 +142,8 @@ function render(){
 
 	camera.lookAt(scene.position);
 	camera.updateMatrixWorld();
-
 	renderer.render(scene, camera);
 }
-
 
 function animate(){
 	requestAnimationFrame( animate );
@@ -165,7 +157,6 @@ function animate(){
 	stats.update();				// fps
 	controls.update();			// control position
 }
-
 
 // mouse 点击事件
 function onDocumentTouchStart( event ) {
@@ -188,8 +179,7 @@ function onDocumentTouchStart( event ) {
 
 			INTERSECTED.push( intersects[0] );		// 第一个交互的点
 
-			var id = intersects[0].object.userData.bid;	// get attribue
-			
+			var id = intersects[0].object.userData.bid;	// get attribue	
 			showMessage( id);
 		
 	}
@@ -197,7 +187,6 @@ function onDocumentTouchStart( event ) {
 
 
 function showMessage( id){
-
 	poi_x = winWidth/2 + mouse.x * winWidth / 2 ;
 	poi_y = winHeight - ( winHeight/2 + mouse.y * winHeight / 2 );
 

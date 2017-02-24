@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>three.js</title>
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<meta name="description" content="展示一些样例,写一些书籍,干点啥好呢,gy的网站">
+	<meta name="description" content="展示一些样例,写一些书籍,gy的网站">
 	<meta name="keywords" content="three.js,demos,canvas,webgl,tricks,前端,guoyang,gy134340,web">
 	<link rel="icon" href="img/icon/favicon.png">
 	<link rel="stylesheet" href="css/reset.css">
@@ -93,7 +93,6 @@ var mouse = new THREE.Vector2();	// 点向量
 mouse.x = 0;
 mouse.y = 0;
 
-
 var meshs = [];
 var chesses = [];
 
@@ -103,10 +102,8 @@ var winHeight = window.innerHeight;
 var INTERSECTED = [];	// 鼠标点击的第一个点,以防快速点击，所以用数组保存
 var PI2 = Math.PI * 2;
 
-
 // 黑棋
 var programFillBlack = function(context){
-
 	context.beginPath();
 	context.arc( 0, 0, 0.5, 0, PI2, true );
 	var my_gradient = context.createLinearGradient(0,0,0.5,0.5);
@@ -118,7 +115,6 @@ var programFillBlack = function(context){
 
 // 白棋
 var programFillWhite = function(context){
-
 	context.beginPath();
 	context.arc( 0, 0, 0.5, 0, PI2, true );
 	var my_gradient = context.createLinearGradient(0,0,0.5,0.5);
@@ -130,7 +126,6 @@ var programFillWhite = function(context){
 
 //point
 var programFillPoint = function(context){
-
 	context.beginPath();
 	context.arc(0, 0, 0.5, 0, PI2, true);
 	context.fillStyle = 'black';
@@ -140,9 +135,7 @@ var programFillPoint = function(context){
 
 // 初始化
 function init(){
-
 	container = document.querySelectorAll('.container')[0];
-
 	raycaster = new THREE.Raycaster();	// 射线
 	mouse = new THREE.Vector2();	// 点向量
 	mouse.x = 0;
@@ -176,7 +169,6 @@ function init(){
 	container.appendChild(stats.dom);
 
 	drawLine();			// 画棋盘
-
 	setGo();			// 添加棋子
 
 	controls = new THREE.TrackballControls( camera, renderer.domElement );
@@ -195,8 +187,6 @@ function init(){
 }	
 
 function render(){
-	
-	
 	camera.lookAt(450,450,0);
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );			// need here
@@ -216,7 +206,6 @@ function animate(){
 }
 
 function onWindowResize() {
-
 	winWidth = window.innerWidth;
 	winHeight = window.innerHeight;
 	renderer.setPixelRatio( window.devicePixelRatio );
@@ -300,7 +289,6 @@ function drawLine() {
 		color: 0xCCCCCC
 	});
 		
-
 	setXaxis(material);
 	setYaxis(material);
 	addPoint();					// 添加棋盘小黑点
@@ -389,7 +377,6 @@ function addPoint(){
 // add canvas 1-19,a-z
 function setSign(sign){
 	var c;
-
 	var material = new THREE.SpriteCanvasMaterial( {
 		color: new THREE.Color(0x000000),
 		program: function ( context ) {
@@ -471,9 +458,6 @@ function showMessage(number){
 init();
 
 animate();
-
-
-
 
 </script>	
 </body>

@@ -156,7 +156,6 @@ function getImageData(context, imgWidth, imgHeight){
 }
 
 function setSprites (canvasWidth, canvasHeight) {
-
 	for(var i = 0; i < canvasWidth; i+=2){
 		for(var j = 0; j < canvasHeight; j+=2){
 
@@ -181,10 +180,8 @@ function setSprites (canvasWidth, canvasHeight) {
 
 
 function flowSprite(){
-
 	for(var i = 0; i < canvasWidth; i+=2){
 		for(var j = 0; j < canvasHeight; j+=2){
-
 			var tmp = cp[i/2*canvasHeight + j/2];
 			if(tmp){
 				if(tmp.position.z <= 20){
@@ -192,7 +189,6 @@ function flowSprite(){
 				}else{
 					tmp.position.z -= 40;
 				}
-				
 			}
 		}
 	}
@@ -224,13 +220,12 @@ function animate () {
 	controls.update();
 }
 
-document.addEventListener('DOMContentLoaded', function(){
+window.onload = function(){
 	init();
 	animate();
-}, false);
+}
 
 function onWindowResize(){
-
 	renderer.setPixelRatio( window.devicePixelRatio );
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();

@@ -108,7 +108,6 @@ function init () {
 function render(){
 	camera.lookAt(scene.position);
 	camera.updateProjectionMatrix();
-
 	renderer.render(scene, camera);
 }
 
@@ -130,16 +129,6 @@ function onWindowResize(){
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize( window.innerWidth, window.innerHeight );
-}
-
-
-	
-function fastAbs(value){
-	return (value ^ (value >> 31)) - (value >> 31);
-}
-
-function threshold(value){
-	return (value > 0x15) ? 0xFF : 0;
 }
 
 </script>

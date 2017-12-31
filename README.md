@@ -1,25 +1,25 @@
 ### from this repository
 
-[Alphago李世石大战棋谱](http://epsilon.space/ai.html)
+[Alphago李世石大战棋谱](http://gy134340.github.io/epsilon/ai.html)
 
-[小方块](http://epsilon.space/tbox.html)
+[小方块](http://gy134340.github.io/epsilon/tbox.html)
 
-[几何图形与粒子](http://epsilon.space/tplayer.html)
+[几何图形与粒子](http://gy134340.github.io/epsilon/tplayer.html)
 
-[Canvas图片切分2D](http://epsilon.space/cimg.html)
+[Canvas图片切分2D](http://gy134340.github.io/epsilon/cimg.html)
 
-[portrait](http://epsilon.space/portrait.html)
+[portrait](http://gy134340.github.io/epsilon/portrait.html)
 
-[恒星与点光源](http://epsilon.space/threebody.html)
+[恒星与点光源](http://gy134340.github.io/epsilon/threebody.html)
 
-[粒子geometry](http://epsilon.space/particle.html)
+[粒子geometry](http://gy134340.github.io/epsilon/particle.html)
 
 
 -----------------------------------------------------
 
-### [paint](https://github.com/gy134340/paint)
+### [paint](http://gy134340.github.io/paint)
 
-[3d空间的小画板](http://www.134340.space/)
+[3d空间的小画板](http://gy134340.github.io/paint)
 
-### [vlan](https://github.com/gy134340/vlan )
-[Program language relationship - Chart](http://www.gy134340.com/vlan)
+### [vlan](http://gy134340.github.io/vlan )
+[Program language relationship - Chart](http://gy134340.github.io/vlan)

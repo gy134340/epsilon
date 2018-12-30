@@ -1,6 +1,6 @@
 ### from this repository
 
-[Alphago李世石大战棋谱](http://gy134340.github.io/epsilon/ai.html)
+[Alphago](http://gy134340.github.io/epsilon/ai.html)
 
 [小方块](http://gy134340.github.io/epsilon/tbox.html)
 
